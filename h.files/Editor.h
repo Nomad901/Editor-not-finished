@@ -11,10 +11,12 @@
 #include "FactoryOfFront.h"
 #include "App.h"
 
+import MenuForEditor;
+
 class Editor
 {
 public:
-	Editor(SDL_Renderer* renderer);
+	Editor(App* app, SDL_Renderer* renderer);
 	~Editor() = default;
 
 	void freezeBlock(SDL_Renderer* renderer, App* app);
@@ -36,8 +38,9 @@ private:
 	void keeperBlock(int number, SDL_Renderer* renderer);
 
 	int size;
-	bool number_b = 1;
+	bool number_b;
 	bool m_forChoose; 
+	bool menuForEditor;
 	std::multimap<std::string, int> lastEl;
 	std::vector<int> numbers;
 	std::vector<std::unique_ptr<FactoryOfRect>> m_factGrass;
@@ -45,5 +48,5 @@ private:
 	std::vector<std::unique_ptr<FactoryOfRect>> m_factLeaf;
 	std::vector<std::unique_ptr<FactoryOfRect>> m_factEmpty;
 	std::vector<std::unique_ptr<FactoryOfFront>> m_factFront;
+	MenuForEditor menu;
 };
-
