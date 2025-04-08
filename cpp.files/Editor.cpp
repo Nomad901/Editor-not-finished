@@ -72,6 +72,11 @@ void Editor::render(SDL_Renderer* renderer)
 			}
 
 		}
+		auto r = rgbColors.find('r');
+		auto g = rgbColors.find('g');
+		auto b = rgbColors.find('b');
+		auto a = rgbColors.find('a');
+		SDL_SetRenderDrawColor(renderer, r->second, g->second, b->second, a->second);
 	}
 	else {
 		menu.handleRender(renderer);
@@ -202,7 +207,56 @@ void Editor::forApp(int& number, SDL_Renderer* renderer, App* app)
 			size = 0;
 			number_b = 1;
 			};
+		auto plusOrMinus = [&](SDL_Event event) 
+		{
+				const Uint8* state = SDL_GetKeyboardState(NULL);
+				bool shift = state[SDL_SCANCODE_LSHIFT] || state[SDL_SCANCODE_RSHIFT];
 
+				auto r = rgbColors.find('r');
+				auto g = rgbColors.find('g');
+				auto b = rgbColors.find('b');
+				auto a = rgbColors.find('a');
+
+				if ((event.key.keysym.sym == SDLK_EQUALS || event.key.keysym.sym == SDLK_PLUS) && shift) {
+					if (state[SDL_SCANCODE_R]) {
+						std::cout << "R++\n";
+						r->second++;
+					}
+					else if (state[SDL_SCANCODE_G]) {
+						std::cout << "G++\n";
+						g->second++;
+					}
+					else if (state[SDL_SCANCODE_B]) {
+						std::cout << "B++\n";
+						b->second++;
+					}
+					else if (state[SDL_SCANCODE_A]) {
+						std::cout << "A++\n";
+						a->second++;
+					}
+				}
+
+				else if ((event.key.keysym.sym == SDLK_MINUS || event.key.keysym.sym == SDLK_UNDERSCORE) && shift) {
+					if (state[SDL_SCANCODE_R]) {
+						std::cout << "R--\n";
+						r->second--;
+					}
+					else if (state[SDL_SCANCODE_G]) {
+						std::cout << "G--\n";
+						g->second--;
+					}
+					else if (state[SDL_SCANCODE_B]) {
+						std::cout << "B--\n";
+						b->second--;
+					}
+					else if (state[SDL_SCANCODE_A]) {
+						std::cout << "A--\n";
+						a->second--;
+					}
+				}
+
+		};
+		
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			if (size == 1) currentTexture(m_factGrass);
@@ -289,11 +343,36 @@ void Editor::forApp(int& number, SDL_Renderer* renderer, App* app)
 					std::cout << "clearAll\n";
 					clearAll(renderer);
 				}
+				else if (event.key.keysym.sym == SDLK_r) {
+					std::cout << "R\n";
+					plusOrMinus(event);
+				}
+				else if (event.key.keysym.sym == SDLK_g) {
+					std::cout << "G\n";
+					plusOrMinus(event);
+				}
+				else if (event.key.keysym.sym == SDLK_b) {
+					std::cout << "B\n";
+					plusOrMinus(event);
+				}
+				else if (event.key.keysym.sym == SDLK_a) {
+					std::cout << "A\n";
+					plusOrMinus(event);
+				}
 			}
 		}
 	}
 	else {
-		menu.handleInstructions(app);
+		SDL_Event event;
+		while (SDL_PollEvent(&event)) {
+			if (event.type == SDL_QUIT) {
+				app->stopLoop();
+			}
+			if (event.key.keysym.sym == SDLK_ESCAPE) {
+				std::cout << "escape\n";
+				menuForEditor = 0;
+			}
+		}
 	}
 }
 
