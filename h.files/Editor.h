@@ -22,7 +22,10 @@ class Editor
 public:
 	Editor() = default;
 	Editor(App* app, SDL_Renderer* renderer);
-	~Editor() = default;
+	~Editor() {
+		delete ptrToImplForRenderer;
+		delete menuForRenderer;
+	}
 
 	void freezeBlock(SDL_Renderer* renderer, App* app);
 	void chooseBlock(SDL_Renderer* renderer);
@@ -38,17 +41,10 @@ private:
 	void keeperBlock(int number, SDL_Renderer* renderer);
 
 	struct impl {
-		impl() {
-			size = 0;
-			number_b = 1;
-			m_forChoose= 0;
-			menuForEditor = 0;
-		}
-		
-		int size;
-		bool number_b;
-		bool m_forChoose;
-		bool menuForEditor;
+		int size = 0;
+		bool number_b = 1;
+		bool m_forChoose = 0;
+		bool menuForEditor = 0;
 		bool blockFrozen;
 		std::unordered_map<char, uint8_t> rgbColors{ {'r',0},{'g',0},{'b',0},{'a',0} };
 		std::multimap<std::string, int> lastEl;
@@ -62,8 +58,9 @@ private:
 	std::unique_ptr<impl> ptrToImpl;
 	std::unique_ptr<MenuForEditor> menu;
 
-	static std::unique_ptr<impl> ptrToImplForRenderer;
-	static std::unique_ptr<MenuForEditor> menuForRenderer;
+protected:
+	static impl* ptrToImplForRenderer;
+	static MenuForEditor* menuForRenderer;
 
 	friend class Renderer;
 };
