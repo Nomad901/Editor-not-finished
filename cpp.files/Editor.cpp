@@ -2,7 +2,10 @@
 
 Editor::Editor(App* app, SDL_Renderer* renderer) 
 {
+	ptrToImpl = std::make_unique<impl>();
 	menu = std::make_unique<MenuForEditor>(app,renderer);
+	ptrToImplForRenderer = ptrToImpl.get();
+	menuForRenderer = menu.get();
 	SDL_Color white{ 255,255,255,255 };
 	ptrToImpl->m_factFront.push_back(std::make_unique<FactoryOfFront>(renderer,white,"Click on the button for the information!",16, "E:/Arial.ttf"));
 	ptrToImpl->m_factEmpty.push_back(std::make_unique<FactoryOfRect>(renderer,"E:/LabelForText.png"));
