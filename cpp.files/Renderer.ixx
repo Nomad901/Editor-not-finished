@@ -3,19 +3,26 @@ export module Renderer;
 import <iostream>;
 import "SDL.h";
 import "Editor.h";
+import "Menu.h";
 
-export class Renderer : private Editor{
+Editor::impl* Editor::ptrToImplForRenderer = nullptr;
+MenuForEditor* Editor::menuForRenderer = nullptr;
+
+export class Renderer {
 public:
 	Renderer();
 	~Renderer();
 
-	struct RenderForEditor {
+	struct RenderForEditor : private Editor{
 	public:
 		RenderForEditor() = default;
-		~RenderForEditor() = default;
-
-		static void render(SDL_Renderer* renderer)
-		{
+		~RenderForEditor() {
+			delete ptrToImplForRenderer;
+			delete menuForRenderer;
+		}
+		
+		static void render(App* app, SDL_Renderer* renderer)
+		{		
 			if (ptrToImplForRenderer->menuForEditor == 0) {
 				renderBackground(renderer);
 
@@ -89,6 +96,34 @@ public:
 			SDL_Rect background = { 0,0, 1280,720 };
 			SDL_RenderFillRect(renderer, &background);
 		}
+
+	};
+	struct RenderForMenu : private Menu {
+	public:
+		RenderForMenu() = default;
+		~RenderForMenu() = default;
+
+		static void render(SDL_Renderer* renderer) {
+			
+			for (size_t i = 0; i < 4; i++)
+			{
+				m_textVct[i]->textToRect(m_smrtVct[i]->getRect());
+				m_textVct[i]->render(renderer);
+			}
+		}
+		
+		for (size_t i = 0; i < 4; i++)
+		{
+			m_textVct[i]->textToRect(m_smrtVct[i]->getRect());
+			m_textVct[i]->render(renderer);
+		}void background(SDL_Window* window, SDL_Renderer* renderer)
+		{
+			int w, h;
+			SDL_GetWindowSize(window, &w, &h);
+			FactoryOfRect f(renderer, "E:/output-onlinepngtools.png");
+			f.setProperties(w, h);
+			f.render(renderer);
+		}
 	};
 
 private:
@@ -96,12 +131,9 @@ private:
 
 };
 
-
 Renderer::Renderer()
 	:renderer(nullptr)
-{
-	
-}
+{}
 
 Renderer::~Renderer() {
 	if(renderer) SDL_DestroyRenderer(renderer);
