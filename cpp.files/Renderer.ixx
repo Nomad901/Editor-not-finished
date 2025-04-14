@@ -7,13 +7,15 @@ import "Menu.h";
 
 Editor::impl* Editor::ptrToImplForRenderer = nullptr;
 MenuForEditor* Editor::menuForRenderer = nullptr;
+Menu::impl* Menu::pImplForRenderer = nullptr;
 
-export class Renderer {
+export class Renderer{
 public:
 	Renderer();
 	~Renderer();
 
-	struct RenderForEditor : private Editor{
+	struct RenderForEditor : private Editor
+	{
 	public:
 		RenderForEditor() = default;
 		~RenderForEditor() {
@@ -98,31 +100,20 @@ public:
 		}
 
 	};
-	struct RenderForMenu : private Menu {
+	struct RenderMenu : private Menu
+	{
 	public:
-		RenderForMenu() = default;
-		~RenderForMenu() = default;
+		RenderMenu() = default;
+		~RenderMenu() {
+			delete pImplForRenderer;
+		}
 
 		static void render(SDL_Renderer* renderer) {
-			
 			for (size_t i = 0; i < 4; i++)
 			{
-				m_textVct[i]->textToRect(m_smrtVct[i]->getRect());
-				m_textVct[i]->render(renderer);
+				pImplForRenderer->m_textVct[i]->textToRect(pImplForRenderer->m_smrtVct[i]->getRect());
+				pImplForRenderer->m_textVct[i]->render(renderer);
 			}
-		}
-		
-		for (size_t i = 0; i < 4; i++)
-		{
-			m_textVct[i]->textToRect(m_smrtVct[i]->getRect());
-			m_textVct[i]->render(renderer);
-		}void background(SDL_Window* window, SDL_Renderer* renderer)
-		{
-			int w, h;
-			SDL_GetWindowSize(window, &w, &h);
-			FactoryOfRect f(renderer, "E:/output-onlinepngtools.png");
-			f.setProperties(w, h);
-			f.render(renderer);
 		}
 	};
 
