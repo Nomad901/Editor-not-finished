@@ -6,6 +6,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL/SDL_ttf.h>
+#include <SDL/SDL_mixer.h>
 #include "FactoryOfRect.h"
 #include "App.h"
 #include "ActionsOfRect.h"
@@ -13,6 +14,9 @@
 #include "FactoryOfFront.h"
 #include "SurfacesA.h"
 #include "Editor.h"
+#include "Music.h"
+
+import Renderer;
 
 static App* app;
 //
@@ -21,7 +25,15 @@ static App* app;
 
 static Editor* editor;
 
+static Music* music;
+
 static int number = 0;
+
+enum class GameModes { THE_GAME, THE_EDITOR, THE_SETTINGS};
+
+void helperOutro(int number) {
+
+}
 
 void actions() {
     SDL_Event event;
@@ -37,11 +49,8 @@ void actions() {
     }
 }
 
-void outro() {
-    //rect1->setPosition(app->mouseX(), app->mouseY());
-    //rect1->setProperties(100, 100);
-    //rect2->setPosition(100, 100);
-    //rect2->setProperties(100, 100);   
+void outro() { 
+    //TODO: maybe i can append here enum instead of conditions
     if (number == 4)
     {
         app->stopLoop();
@@ -50,42 +59,39 @@ void outro() {
         std::cout << "This will be working through a while! 3 \n";
     }
     else if (number == 2) {
-        if (!editor) 
-            editor = new Editor(app->getRenderer());
-        editor->render(app->getRenderer());
-        app->actionOfLoop([&]()->void { editor->forApp(number,app->getRenderer(),app);});
-
+        if (!editor)
+            editor = new Editor(app, app->getRenderer());
+        Renderer::RenderForEditor::render(app, app->getRenderer());
+        app->actionOfLoop([&]()->void { editor->HandleActions(number,app->getRenderer(),app);});
     }
     else if(number == 1){
         std::cout << "This will be working through a while! 3 \n";
     }
     else
     {
-       Menu::getInstance().background(app->getWindow(), app->getRenderer());
+       Menu::getInstance().background(app->getWindow(), app->getRenderer(), "E:/output-onlinepngtools.png");
        number = Menu::getInstance().buttons(app->getRenderer());
+       Renderer::RenderMenu::render(app->getRenderer());
        app->actionOfLoop(actions);
     }
-
-    //rect1->render(app->getRenderer());
-    //rect2->render(app->getRenderer());
 }
 
 int main(int argc, char* argv[]) {
     
-    app = new App("Minecraft 2d", 100, 100, 1280, 720);
-    
-    //rect1 = new FactoryOfRect(app->getRenderer(), "E:/grass.png");
-    //rect2 = new FactoryOfRect(app->getRenderer(), "E:/grass.png");
+    app = new App(SDL_INIT_VIDEO | SDL_INIT_AUDIO, "Minecraft 2d", 100, 100, 1280, 720);
 
+    music = new Music("E:/01. The Journey Begins.mp3");
+    music->setVolume(5);
+    music->playMusic(-1);
+    
     app->actionOfLoop(actions);
     app->outroOfLoop(outro);
-
     app->runLoop();
  
+
     delete app;
-    //delete rect1;
-    //delete rect2;
     delete editor;
+    delete music;
     return 0;
 }
 
