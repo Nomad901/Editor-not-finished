@@ -15,25 +15,14 @@
 #include "SurfacesA.h"
 #include "Editor.h"
 #include "Music.h"
+#include "outro.h"
 
 import Renderer;
 
 static App* app;
-//
-//static FactoryOfRect* rect1;
-//static FactoryOfRect* rect2;
-
 static Editor* editor;
-
 static Music* music;
-
-static int number = 0;
-
-enum class GameModes { THE_GAME, THE_EDITOR, THE_SETTINGS};
-
-void helperOutro(int number) {
-
-}
+static outro* outro_;
 
 void actions() {
     SDL_Event event;
@@ -49,31 +38,43 @@ void actions() {
     }
 }
 
-void outro() { 
-    //TODO: maybe i can append here enum instead of conditions
-    if (number == 4)
+void outroMain() { 
+    int number = outro_->getNumberFromMenu();
+
+    auto gameLambda     = [&]() 
     {
-        app->stopLoop();
-    }
-    else if (number == 3) {
-        std::cout << "This will be working through a while! 3 \n";
-    }
-    else if (number == 2) {
+        std::cout << "This wont be working for a while!\n";
+    };
+    auto editorLambda   = [&]() 
+    {
         if (!editor)
             editor = new Editor(app, app->getRenderer());
         Renderer::RenderForEditor::render(app, app->getRenderer());
-        app->actionOfLoop([&]()->void { editor->HandleActions(number,app->getRenderer(),app);});
-    }
-    else if(number == 1){
-        std::cout << "This will be working through a while! 3 \n";
-    }
-    else
+        app->actionOfLoop([&]()->void { editor->HandleActions(number, app->getRenderer(), app);});
+    };
+    auto settingsLambda = [&]()
     {
-       Menu::getInstance().background(app->getWindow(), app->getRenderer(), "E:/output-onlinepngtools.png");
-       number = Menu::getInstance().buttons(app->getRenderer());
-       Renderer::RenderMenu::render(app->getRenderer());
-       app->actionOfLoop(actions);
-    }
+        std::cout << "This wont be working for a while!\n";
+    };
+    auto exitLambda     = [&]()
+    {
+        app->stopLoop();
+    };
+    auto menuLambda     = [&]() -> int
+    {
+        Menu::getInstance().background(app->getWindow(), app->getRenderer(), "E:/output-onlinepngtools.png");
+        int number = Menu::getInstance().buttons(app->getRenderer());
+        Renderer::RenderMenu::render(app->getRenderer());
+        app->actionOfLoop(actions);
+        return number;
+    };
+
+
+    outro_->appendFunctional(Type::MAIN_MENU,     menuLambda);
+    outro_->appendFunctional(Type::MAIN_EDITOR,   editorLambda);
+
+    outro_->manageFunctional(number);
+
 }
 
 int main(int argc, char* argv[]) {
@@ -84,11 +85,13 @@ int main(int argc, char* argv[]) {
     music->setVolume(5);
     music->playMusic(-1);
     
+    outro_ = new outro();
+
     app->actionOfLoop(actions);
-    app->outroOfLoop(outro);
+    app->outroOfLoop(outroMain);
     app->runLoop();
  
-
+    delete outro_;
     delete app;
     delete editor;
     delete music;
