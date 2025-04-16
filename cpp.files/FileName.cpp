@@ -39,7 +39,6 @@ void actions() {
 }
 
 void outroMain() { 
-    int number = outro_->getNumberFromMenu();
 
     auto gameLambda     = [&]() 
     {
@@ -50,7 +49,7 @@ void outroMain() {
         if (!editor)
             editor = new Editor(app, app->getRenderer());
         Renderer::RenderForEditor::render(app, app->getRenderer());
-        app->actionOfLoop([&]()->void { editor->HandleActions(number, app->getRenderer(), app);});
+        app->actionOfLoop([&]()->void { editor->HandleActions(outro_->getNumber(), app->getRenderer(), app);});
     };
     auto settingsLambda = [&]()
     {
@@ -68,13 +67,15 @@ void outroMain() {
         app->actionOfLoop(actions);
         return number;
     };
-
-
-    outro_->appendFunctional(Type::MAIN_MENU,     menuLambda);
-    outro_->appendFunctional(Type::MAIN_EDITOR,   editorLambda);
-
-    outro_->manageFunctional(number);
-
+    
+    outro_->appendMenu(menuLambda);
+    outro_->appendFunction(Type::MAIN_EDITOR, editorLambda);
+    outro_->appendFunction(Type::MAIN_EXIT, exitLambda);
+        
+    outro_->execute(Type::MAIN_MENU);
+    if (outro_->getNumber() != 0)
+        outro_->executeOfNumber();
+    
 }
 
 int main(int argc, char* argv[]) {
