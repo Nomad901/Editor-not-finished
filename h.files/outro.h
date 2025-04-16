@@ -11,35 +11,65 @@
 
 import Renderer;
 
-enum class Type{MAIN_GAME,MAIN_EDITOR,MAIN_SETTINGS,MAIN_EXIT,MAIN_MENU};
+enum class Type { MAIN_MENU, MAIN_GAME, MAIN_EDITOR, MAIN_SETTINGS, MAIN_EXIT };
 
 class outro
 {
 public:
-	outro()
-	{
-		pImpl = std::make_unique<Impl>();
+	outro() : number(0){}
+	~outro(){}
+	
+	//MAIN_GAME, MAIN_EDITOR, MAIN_SETTINGS, MAIN_EXIT, MAIN_MENU
+	void appendFunction(Type type, std::function<void(void)> func) {	
+		auto it = mapOfLambdas.find(type);
+		if (it != mapOfLambdas.end())
+			mapOfLambdas[type] = std::function<void(void)>(func);
+		else
+			mapOfLambdas.emplace(std::make_pair(type, std::function<void(void)>(func)));
 	}
-	~outro() {
-		delete pImpl->app;
-		delete pImpl->renderer;
+	void appendMenu(std::function<int(void)> func) {
+			mainMenu = func;
 	}
 
-	// can embrace only lambdas (ofc you can also leave here
-	// a function, but why u need to create this if lambdas
-	// are a much more flex?)
-	//MAIN_GAME / MAIN_EDITOR / MAIN_SETTINGS / MAIN_EXIT / MAIN_MENU
-	void appendFunctional(Type type,std::function<void(void)> func);
-	//MAIN_GAME / MAIN_EDITOR / MAIN_SETTINGS / MAIN_EXIT / MAIN_MENU
-	void manageFunctional(int& number);
-	
-	int getNumberFromMenu() { return pImpl->number; }
+	void removeFunction(Type type) {
+		auto it = mapOfLambdas.find(type);
+		if (it != mapOfLambdas.end())
+			mapOfLambdas.erase(it);
+		else
+			std::cout << "this type doesnt exist!\n";
+	}
+	void removeAll() {
+		mapOfLambdas.clear();
+	}
+
+	void execute(Type type) {
+		if (type == Type::MAIN_MENU)
+			number = mainMenu();
+		else {
+			if (lastType.back() != type) {
+				auto it = mapOfLambdas.find(type);
+				if (it != mapOfLambdas.end())
+				{
+					it->second();
+					lastType.push_back(type);
+				}
+			}
+			else {
+				auto it = mapOfLambdas.end();
+				it->second();
+			}
+		}
+	}
+	void executeOfNumber() {
+		execute(static_cast<Type>(number));
+	}
+
+	int& getNumber() { return number; }
 
 private:
-	struct Impl {
-		int number = 0;
-		std::unordered_map<Type, std::function<void(void)>> mapOfFunctions;
-	};
-	std::unique_ptr<Impl> pImpl;
+	std::unordered_map<Type, std::function<void(void)>> mapOfLambdas;
+	std::function<int(void)> mainMenu;
+	std::vector<Type> lastType;
+	int number;
 };
 
